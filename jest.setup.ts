@@ -1,3 +1,3 @@
 import '@testing-library/jest-dom';
 
-expect.extend({});
+// Arquivo executado imediatamente após a inicialização do ambiente de teste, mas antes que qualquer teste seja rodado.

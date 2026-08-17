@@ -3,7 +3,7 @@ import createJestConfig from 'next/jest.js';
 const config = createJestConfig({
   dir: './',
 })({
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // informa ao Jest qual arquivo executar antes dos testes, depois que o ambiente de teste foi configurado.
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   transform: {},
   testEnvironment: 'jest-environment-jsdom',
