@@ -7,11 +7,11 @@ import { ArrowLeftToLine, ArrowRightToLine, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export const SidebarContent = () => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(true);
   const router = useRouter();
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen);
+    setIsExpanded(!isExpanded);
   };
 
   const handleNewPrompt = () => {
@@ -22,10 +22,10 @@ export const SidebarContent = () => {
     <aside
       className={cn(
         'border-r border-gray-700 flex flex-col h-full bg-gray-800 transition-[transform,width] duration-300 ease-in-out fixed md:relative left-0 top-0 z-50 md:z-auto w-[80vw] sm:w-[320px]',
-        isOpen ? 'md:w-[384px]' : 'md:w-18'
+        isExpanded ? 'md:w-[384px]' : 'md:w-18'
       )}
     >
-      {isOpen && (
+      {isExpanded && (
         <>
           <section className="p-6">
             <div className="md:hidden mb-4">
@@ -71,7 +71,7 @@ export const SidebarContent = () => {
         </>
       )}
 
-      {!isOpen && (
+      {!isExpanded && (
         <section className="px-2 py-6">
           <header className="flex items-center justify-between mb-6">
             <Button
