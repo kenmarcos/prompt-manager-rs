@@ -1,4 +1,7 @@
-import { SidebarContent } from '@/components/sidebar/sidebar-content';
+import {
+  SidebarContent,
+  SidebarContentProps,
+} from '@/components/sidebar/sidebar-content';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
@@ -12,8 +15,19 @@ jest.mock('next/navigation', () => {
   };
 });
 
-const makeSut = () => {
-  render(<SidebarContent />);
+const initialPrompts = [
+  {
+    id: '1',
+    title: 'Title 1',
+    content: 'Content 1',
+  },
+];
+
+// fabricar o SUT (System Under Test)
+const makeSut = (
+  { prompts = initialPrompts }: SidebarContentProps = {} as SidebarContentProps
+) => {
+  render(<SidebarContent prompts={prompts} />);
 };
 
 describe('SidebarContent', () => {
@@ -97,5 +111,25 @@ describe('SidebarContent', () => {
     expect(sidebar).toHaveClass('md:w-[384px]');
     expect(collapseButtonSecond).toBeInTheDocument();
     expect(expandButton).not.toBeInTheDocument();
+  });
+
+  it('should render the prompt list', () => {
+    const input = [
+      {
+        id: '1',
+        title: 'Title 1',
+        content: 'Content 1',
+      },
+      {
+        id: '2',
+        title: 'Title 2',
+        content: 'Content 2',
+      },
+    ];
+
+    makeSut({ prompts: input });
+
+    expect(screen.getByText(input[0].title)).toBeInTheDocument();
+    expect(screen.getAllByRole('paragraph')).toHaveLength(input.length);
   });
 });

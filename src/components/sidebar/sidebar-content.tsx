@@ -6,7 +6,17 @@ import { Button } from '../ui/button';
 import { ArrowLeftToLine, ArrowRightToLine, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export const SidebarContent = () => {
+interface Prompt {
+  id: string;
+  title: string;
+  content: string;
+}
+
+export interface SidebarContentProps {
+  prompts: Prompt[];
+}
+
+export const SidebarContent = ({ prompts }: SidebarContentProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const router = useRouter();
 
@@ -86,6 +96,10 @@ export const SidebarContent = () => {
           </header>
         </section>
       )}
+
+      {prompts.map((prompt) => (
+        <p key={prompt.id}>{prompt.title}</p>
+      ))}
     </aside>
   );
 };
