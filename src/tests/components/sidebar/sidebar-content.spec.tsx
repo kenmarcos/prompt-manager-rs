@@ -4,14 +4,18 @@ import {
 } from '@/components/sidebar/sidebar-content';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { useSearchParams } from 'next/navigation';
 
 const pushMock = jest.fn();
+
+let mockSearchParams = new URLSearchParams();
 
 jest.mock('next/navigation', () => {
   return {
     useRouter: () => ({
       push: pushMock,
     }),
+    useSearchParams: () => mockSearchParams,
   };
 });
 
@@ -131,5 +135,41 @@ describe('SidebarContent', () => {
 
     expect(screen.getByText(input[0].title)).toBeInTheDocument();
     expect(screen.getAllByRole('paragraph')).toHaveLength(input.length);
+  });
+
+  it('should update the search field when typing', async () => {
+    makeSut();
+    const text = 'Teste';
+    const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+
+    await userEvent.type(searchField, text);
+
+    expect(searchField).toHaveValue(text);
+  });
+
+  it('should navigate with encoded URL when typing in the search field and clear the search field', async () => {
+    const text = 'A B';
+    makeSut();
+    const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+
+    await userEvent.type(searchField, text);
+    expect(pushMock).toHaveBeenCalled();
+    const lastCall = pushMock.mock.calls.at(-1);
+    expect(lastCall?.[0]).toBe('/?q=A%20B');
+
+    await userEvent.clear(searchField);
+    const lastClearCall = pushMock.mock.calls.at(-1);
+    expect(lastClearCall?.[0]).toBe('/');
+  });
+
+  it('should initialize the search field with the query parameter', async () => {
+    const text = 'Teste';
+    const searchParams = new URLSearchParams();
+    searchParams.set('q', text);
+    mockSearchParams = searchParams;
+    makeSut();
+    const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+
+    expect(searchField).toHaveValue(text);
   });
 });

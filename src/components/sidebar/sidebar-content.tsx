@@ -1,10 +1,11 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { Button } from '../ui/button';
 import { ArrowLeftToLine, ArrowRightToLine, Plus, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Input } from '../ui/input';
 
 interface Prompt {
   id: string;
@@ -17,7 +18,11 @@ export interface SidebarContentProps {
 }
 
 export const SidebarContent = ({ prompts }: SidebarContentProps) => {
+  const searchParams = useSearchParams();
+
   const [isExpanded, setIsExpanded] = useState(true);
+  const [searchInput, setSearchInput] = useState(searchParams.get('q') ?? '');
+
   const router = useRouter();
 
   const toggleSidebar = () => {
@@ -26,6 +31,17 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
 
   const handleNewPrompt = () => {
     router.push('/new');
+  };
+
+  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
+    const newSearchInput = event.target.value;
+    setSearchInput(newSearchInput);
+
+    const url = newSearchInput
+      ? `/?q=${encodeURIComponent(newSearchInput)}`
+      : '/';
+
+    router.push(url, { scroll: false });
   };
 
   return (
@@ -65,6 +81,19 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
               </header>
             </div>
 
+            <section className="mb-5">
+              <form action="">
+                <Input
+                  name="q"
+                  type="text"
+                  placeholder="Buscar prompt..."
+                  autoFocus
+                  onChange={handleSearch}
+                  value={searchInput}
+                />
+              </form>
+            </section>
+
             <div>
               <Button
                 aria-label="Novo prompt"
@@ -97,7 +126,7 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
         </section>
       )}
 
-      {prompts.map((prompt) => (
+      {prompts?.map((prompt) => (
         <p key={prompt.id}>{prompt.title}</p>
       ))}
     </aside>
