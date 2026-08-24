@@ -6,15 +6,11 @@ import { Button } from '../ui/button';
 import { ArrowLeftToLine, ArrowRightToLine, Plus, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '../ui/input';
-
-interface Prompt {
-  id: string;
-  title: string;
-  content: string;
-}
+import { PromptSummary } from '@/core/domain/prompts/prompt.entity';
+import { PromptList } from '../prompts';
 
 export interface SidebarContentProps {
-  prompts: Prompt[];
+  prompts: PromptSummary[];
 }
 
 export const SidebarContent = ({ prompts }: SidebarContentProps) => {
@@ -67,7 +63,10 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
             </div>
 
             <div className="flex w-full items-center justify-between mb-6">
-              <header className="flex w-full items-center justify-between">
+              <header
+                className="flex w-full items-center justify-between"
+                aria-label="Título do sidebar"
+              >
                 PROMPT MANAGER
                 <Button
                   variant="icon"
@@ -107,6 +106,13 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
               </Button>
             </div>
           </section>
+
+          <nav
+            className="flex-1 overflow-auto px-6 pb-6"
+            aria-label="Lista de prompts"
+          >
+            <PromptList prompts={prompts} />
+          </nav>
         </>
       )}
 
@@ -123,12 +129,14 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
               <ArrowRightToLine className="w-5 h-5 text-gray-100" />
             </Button>
           </header>
+
+          <div className="flex items-center justify-center">
+            <Button aria-label="Minimizar sidebar" title="Minimizar sidebar">
+              <Plus className="w-5 h-5 text-white" />
+            </Button>
+          </div>
         </section>
       )}
-
-      {prompts?.map((prompt) => (
-        <p key={prompt.id}>{prompt.title}</p>
-      ))}
     </aside>
   );
 };

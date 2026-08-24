@@ -19,17 +19,18 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="pt-BR">
       <body
-        className={cn('antialiased bg-gray-900 text-white', inter.variable)}
+        className={cn(
+          'antialiased bg-gray-900 text-white flex h-screen',
+          inter.variable
+        )}
       >
-        <section className="flex h-screen">
-          <Sidebar />
+        <Sidebar />
 
-          <main className="relative flex-1 overflow-auto min-w-0">
-            <div className="p-4 sm:p-6 md:p-8 max-w-full md:max-w-3xl mx-auto h-full">
-              {children}
-            </div>
-          </main>
-        </section>
+        <main className="relative flex-1 overflow-auto min-w-0">
+          <div className="p-4 sm:p-6 md:p-8 max-w-full md:max-w-3xl mx-auto h-full">
+            {children}
+          </div>
+        </main>
       </body>
     </html>
   );

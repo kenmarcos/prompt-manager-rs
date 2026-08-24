@@ -38,7 +38,7 @@ describe('SidebarContent', () => {
   it('should render the sidebar content', () => {
     makeSut();
 
-    const header = screen.getByRole('banner');
+    const header = screen.getByRole('banner', { name: /título do sidebar/i });
 
     expect(screen.getByRole('complementary')).toBeInTheDocument();
     expect(header).toBeInTheDocument();
@@ -85,10 +85,14 @@ describe('SidebarContent', () => {
     const expandButton = screen.getByRole('button', {
       name: /expandir sidebar/i,
     });
+    const newPromptButton = screen.getByRole('button', {
+      name: /minimizar sidebar/i,
+    });
 
     expect(sidebar).toHaveClass('md:w-18');
     expect(collapseButton).not.toBeInTheDocument();
     expect(expandButton).toBeInTheDocument();
+    expect(newPromptButton).toBeInTheDocument();
   });
 
   it('should expand the sidebar when clicking the exapand button', async () => {
@@ -171,5 +175,36 @@ describe('SidebarContent', () => {
     const searchField = screen.getByPlaceholderText(/buscar prompt/i);
 
     expect(searchField).toHaveValue(text);
+  });
+
+  it('should not render the prompt list when the sidebar is collapsed', async () => {
+    makeSut();
+
+    const collapseButton = screen.getByRole('button', {
+      name: /minimizar sidebar/i,
+    });
+
+    const promptList = screen.queryByRole('navigation', {
+      name: /lista de prompts/i,
+    });
+
+    await userEvent.click(collapseButton);
+
+    expect(promptList).not.toBeInTheDocument();
+  });
+
+  it('should render the prompt list when the sidebar is expanded', async () => {
+    makeSut();
+
+    const collapseButton = screen.getByRole('button', {
+      name: /minimizar sidebar/i,
+    });
+
+    const promptList = screen.queryByRole('navigation', {
+      name: /lista de prompts/i,
+    });
+
+    expect(collapseButton).toBeInTheDocument();
+    expect(promptList).toBeInTheDocument();
   });
 });
