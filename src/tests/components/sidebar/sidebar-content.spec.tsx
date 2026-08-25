@@ -4,7 +4,6 @@ import {
 } from '@/components/sidebar/sidebar-content';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { useSearchParams } from 'next/navigation';
 
 const pushMock = jest.fn();
 

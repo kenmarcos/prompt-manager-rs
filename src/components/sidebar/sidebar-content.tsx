@@ -1,25 +1,39 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useActionState, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { ArrowLeftToLine, ArrowRightToLine, Plus, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '../ui/input';
 import { PromptSummary } from '@/core/domain/prompts/prompt.entity';
 import { PromptList } from '../prompts';
+import { searchPromptAction } from '@/app/actions/prompt.actions';
+import { Spinner } from '../ui/spinner';
 
 export interface SidebarContentProps {
   prompts: PromptSummary[];
 }
 
 export const SidebarContent = ({ prompts }: SidebarContentProps) => {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchInput, setSearchInput] = useState(searchParams.get('q') ?? '');
 
-  const router = useRouter();
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  const [searchPromptFormState, searchPromptFormAction, isPending] =
+    useActionState(searchPromptAction, {
+      success: true,
+      prompts,
+    });
+
+  const hasQuery = searchInput.trim().length > 0;
+  const promptList = hasQuery
+    ? (searchPromptFormState.prompts ?? prompts)
+    : prompts;
 
   const toggleSidebar = () => {
     setIsExpanded(!isExpanded);
@@ -29,7 +43,7 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
     router.push('/new');
   };
 
-  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleSearchPrompt = (event: ChangeEvent<HTMLInputElement>) => {
     const newSearchInput = event.target.value;
     setSearchInput(newSearchInput);
 
@@ -38,6 +52,8 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
       : '/';
 
     router.push(url, { scroll: false });
+
+    formRef.current?.requestSubmit();
   };
 
   return (
@@ -81,15 +97,29 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
             </div>
 
             <section className="mb-5">
-              <form action="">
+              <form
+                ref={formRef}
+                action={searchPromptFormAction}
+                className="group relative w-full"
+              >
                 <Input
                   name="q"
                   type="text"
                   placeholder="Buscar prompt..."
                   autoFocus
-                  onChange={handleSearch}
+                  onChange={handleSearchPrompt}
                   value={searchInput}
                 />
+
+                {isPending && (
+                  <div
+                    title="Buscando prompt"
+                    aria-label="Buscando prompt"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-300"
+                  >
+                    <Spinner />
+                  </div>
+                )}
               </form>
             </section>
 
@@ -111,7 +141,7 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
             className="flex-1 overflow-auto px-6 pb-6"
             aria-label="Lista de prompts"
           >
-            <PromptList prompts={prompts} />
+            <PromptList prompts={promptList} />
           </nav>
         </>
       )}
