@@ -206,4 +206,36 @@ describe('SidebarContent', () => {
     expect(collapseButton).toBeInTheDocument();
     expect(promptList).toBeInTheDocument();
   });
+
+  it('should submit the form when typing in the search field', async () => {
+    const submitSpy = jest
+      .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+      .mockImplementation(() => undefined);
+
+    makeSut();
+
+    const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+
+    await userEvent.type(searchField, 'AI');
+
+    expect(submitSpy).toHaveBeenCalled();
+    submitSpy.mockRestore();
+  });
+
+  it('should submit automatically on initial render when a query param is provided', async () => {
+    const submitSpy = jest
+      .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+      .mockImplementation(() => undefined);
+
+    const text = 'text';
+    const searchParams = new URLSearchParams();
+    searchParams.set('q', text);
+
+    mockSearchParams = searchParams;
+
+    makeSut();
+
+    expect(submitSpy).toHaveBeenCalled();
+    submitSpy.mockRestore();
+  });
 });

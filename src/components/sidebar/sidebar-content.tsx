@@ -1,7 +1,13 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ChangeEvent, useActionState, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { Button } from '../ui/button';
 import { ArrowLeftToLine, ArrowRightToLine, Plus, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -55,6 +61,12 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
 
     formRef.current?.requestSubmit();
   };
+
+  useEffect(() => {
+    if (!hasQuery) return;
+
+    formRef.current?.requestSubmit();
+  }, [hasQuery]);
 
   return (
     <aside
