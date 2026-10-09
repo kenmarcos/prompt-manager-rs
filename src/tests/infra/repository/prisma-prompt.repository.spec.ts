@@ -1,8 +1,12 @@
+import { CreatePromptDTO } from '@/core/application/prompts/create-prompt.dto';
 import { Prompt } from '@/core/domain/prompts/prompt.entity';
 import { PrismaClient } from '@/generated/prisma/client';
 import { PrismaPromptRepository } from '@/infra/repository/prisma-prompt.repository';
 
 interface PromptDelegateMock {
+  create: jest.MockedFunction<
+    (args: { data: CreatePromptDTO }) => Promise<void>
+  >;
   findMany: jest.MockedFunction<
     (args: {
       orderBy?: { createdAt: 'asc' | 'desc' };
@@ -14,6 +18,13 @@ interface PromptDelegateMock {
       };
     }) => Promise<Prompt[]>
   >;
+  findFirst: jest.MockedFunction<
+    (args: {
+      where?: {
+        title: string;
+      };
+    }) => Promise<Pick<Prompt, 'id' | 'title' | 'content'>>
+  >;
 }
 
 interface PrismaMock {
@@ -23,7 +34,9 @@ interface PrismaMock {
 const createMockPrisma = () => {
   const mock = {
     prompt: {
+      create: jest.fn(),
       findMany: jest.fn(),
+      findFirst: jest.fn(),
     },
   };
 
@@ -37,6 +50,21 @@ describe('PrismaPromptRepository', () => {
   beforeEach(() => {
     prisma = createMockPrisma();
     repository = new PrismaPromptRepository(prisma);
+  });
+
+  describe('create', () => {
+    it('should call prisma.prompt.create with the correct data', async () => {
+      const input = {
+        title: 'title',
+        content: 'content',
+      };
+
+      await repository.create(input);
+
+      expect(prisma.prompt.create).toHaveBeenCalledWith({
+        data: input,
+      });
+    });
   });
 
   describe('findMany', () => {
@@ -134,6 +162,26 @@ describe('PrismaPromptRepository', () => {
         orderBy: { createdAt: 'desc' },
       });
       expect(results).toMatchObject(input);
+    });
+  });
+
+  describe('findByTitle', () => {
+    it('should call findFirst correctly with the provided title', async () => {
+      const title = 'Title 01';
+      const input = {
+        id: '1',
+        title,
+        content: 'Content 01',
+      };
+
+      prisma.prompt.findFirst.mockResolvedValue(input);
+
+      const result = await repository.findByTitle(title);
+
+      expect(prisma.prompt.findFirst).toHaveBeenCalledWith({
+        where: { title },
+      });
+      expect(result).toMatchObject(input);
     });
   });
 });

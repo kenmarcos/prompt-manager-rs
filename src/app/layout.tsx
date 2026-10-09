@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/sidebar';
 import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
+import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
@@ -31,6 +32,8 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
             {children}
           </div>
         </main>
+
+        <Toaster position="top-right" />
       </body>
     </html>
   );

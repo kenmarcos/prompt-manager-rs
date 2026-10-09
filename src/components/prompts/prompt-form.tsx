@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Field, FieldError } from '../ui/field';
 import { createPromptAction } from '@/app/actions/prompt.actions';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export const PromptForm = () => {
   const router = useRouter();
@@ -26,12 +27,13 @@ export const PromptForm = () => {
 
   const handleSubmitForm = async (data: CreatePromptDTO) => {
     const result = await createPromptAction(data);
-    console.log('result', result);
 
     if (!result.success) {
+      toast.error(result.message);
       return;
     }
 
+    toast.success(result.message);
     router.refresh();
   };
 
