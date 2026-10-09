@@ -5,11 +5,14 @@ import { PrismaClient } from '@/generated/prisma/client';
 
 export class PrismaPromptRepository implements PromptRepository {
   constructor(private prisma: PrismaClient) {}
-  findByTitle(title: string): Promise<Prompt | null> {
-    throw new Error('Method not implemented.');
-  }
-  create(data: CreatePromptDTO): Promise<void> {
-    throw new Error('Method not implemented.');
+
+  async create(data: CreatePromptDTO): Promise<void> {
+    await this.prisma.prompt.create({
+      data: {
+        title: data.title,
+        content: data.content,
+      },
+    });
   }
 
   async findMany(): Promise<Prompt[]> {
@@ -38,5 +41,13 @@ export class PrismaPromptRepository implements PromptRepository {
     });
 
     return prompts;
+  }
+
+  async findByTitle(title: string): Promise<Prompt | null> {
+    const prompt = await this.prisma.prompt.findFirst({
+      where: { title },
+    });
+
+    return prompt;
   }
 }
