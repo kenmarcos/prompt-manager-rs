@@ -2,7 +2,7 @@ import {
   SidebarContent,
   SidebarContentProps,
 } from '@/components/sidebar/sidebar-content';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@/lib/test-utils';
 import { userEvent } from '@testing-library/user-event';
 
 const pushMock = jest.fn();
@@ -30,7 +30,7 @@ const initialPrompts = [
 const makeSut = (
   { prompts = initialPrompts }: SidebarContentProps = {} as SidebarContentProps
 ) => {
-  render(<SidebarContent prompts={prompts} />);
+  return render(<SidebarContent prompts={prompts} />);
 };
 
 describe('SidebarContent', () => {
