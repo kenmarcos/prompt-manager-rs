@@ -2,7 +2,7 @@ import {
   SidebarContent,
   SidebarContentProps,
 } from '@/components/sidebar/sidebar-content';
-import { render, screen } from '@/lib/test-utils';
+import { render, screen, waitFor } from '@/lib/test-utils';
 import { userEvent } from '@testing-library/user-event';
 
 const pushMock = jest.fn();
@@ -34,6 +34,11 @@ const makeSut = (
 };
 
 describe('SidebarContent', () => {
+  beforeEach(() => {
+    mockSearchParams = new URLSearchParams();
+    pushMock.mockClear();
+  });
+
   it('should render the sidebar content', () => {
     makeSut();
 
@@ -173,7 +178,7 @@ describe('SidebarContent', () => {
     makeSut();
     const searchField = screen.getByPlaceholderText(/buscar prompt/i);
 
-    expect(searchField).toHaveValue(text);
+    await waitFor(() => expect(searchField).toHaveValue(text));
   });
 
   it('should not render the prompt list when the sidebar is collapsed', async () => {
