@@ -7,12 +7,13 @@ import {
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Field, FieldError } from '../ui/field';
 import { createPromptAction } from '@/app/actions/prompt.actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { CopyButton } from '../button-actions';
 
 export const PromptForm = () => {
   const router = useRouter();
@@ -23,6 +24,11 @@ export const PromptForm = () => {
       title: '',
       content: '',
     },
+  });
+
+  const content = useWatch({
+    control: form.control,
+    name: 'content',
   });
 
   const handleSubmitForm = async (data: CreatePromptDTO) => {
@@ -40,6 +46,8 @@ export const PromptForm = () => {
   return (
     <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-6">
       <header className="flex flex-wrap gap-2 items-center mb-6 justify-end">
+        <CopyButton content={content} />
+
         <Button type="submit" size="sm">
           Salvar
         </Button>
