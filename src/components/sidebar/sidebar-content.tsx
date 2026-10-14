@@ -16,6 +16,7 @@ import { PromptSummary } from '@/core/domain/prompts/prompt.entity';
 import { PromptList } from '../prompts';
 import { searchPromptAction } from '@/app/actions/prompt.actions';
 import { Spinner } from '../ui/spinner';
+import { Logo } from '../logo';
 
 export interface SidebarContentProps {
   prompts: PromptSummary[];
@@ -95,7 +96,7 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
                 className="flex w-full items-center justify-between"
                 aria-label="Título do sidebar"
               >
-                PROMPT MANAGER
+                <Logo />
                 <Button
                   variant="icon"
                   className="hidden md:inline-flex p-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-accent-500 rounded-lg transition-colors"
