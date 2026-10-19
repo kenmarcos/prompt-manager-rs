@@ -41,8 +41,8 @@ test('Validação de duplicidade de título', async ({ page }) => {
 
   await expect(page.getByPlaceholder(/título do prompt/i)).toBeVisible();
 
-  await page.fill('input[name=title]', duplicateTitle);
-  await page.fill('textarea[name=content]', content);
+  await page.fill('input[name="title"]', duplicateTitle);
+  await page.fill('textarea[name="content"]', content);
 
   await page.getByRole('button', { name: /salvar/i }).click();
 

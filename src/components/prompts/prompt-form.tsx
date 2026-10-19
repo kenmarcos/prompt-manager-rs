@@ -10,19 +10,27 @@ import { Textarea } from '../ui/textarea';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Field, FieldError } from '../ui/field';
-import { createPromptAction } from '@/app/actions/prompt.actions';
+import {
+  createPromptAction,
+  updatePromptAction,
+} from '@/app/actions/prompt.actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { CopyButton } from '../button-actions';
+import { Prompt } from '@/generated/prisma/client';
 
-export const PromptForm = () => {
+interface PromptFormProps {
+  prompt?: Prompt | null;
+}
+
+export const PromptForm = ({ prompt }: PromptFormProps) => {
   const router = useRouter();
 
   const form = useForm<CreatePromptDTO>({
     resolver: zodResolver(createPromptSchema),
     defaultValues: {
-      title: '',
-      content: '',
+      title: prompt?.title || '',
+      content: prompt?.content || '',
     },
   });
 
@@ -31,8 +39,15 @@ export const PromptForm = () => {
     name: 'content',
   });
 
+  const isEdit = !!prompt?.id;
+
   const handleSubmitForm = async (data: CreatePromptDTO) => {
-    const result = await createPromptAction(data);
+    const result = isEdit
+      ? await updatePromptAction({
+          id: prompt.id,
+          ...data,
+        })
+      : await createPromptAction(data);
 
     if (!result.success) {
       toast.error(result.message);
