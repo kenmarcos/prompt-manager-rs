@@ -36,4 +36,5 @@ test('Edição de prompt via UI (sucesso)', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: updatedTitle })).toBeVisible();
   await expect(page.locator('input[name="title"]')).toHaveValue(updatedTitle);
+  // await expect(page.getByPlaceholder(/título do prompt/i)).toHaveValue(updatedTitle);
 });
