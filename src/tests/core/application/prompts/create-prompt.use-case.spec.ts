@@ -3,7 +3,7 @@ import { PromptRepository } from '@/core/domain/prompts/prompt.repository';
 
 const makeRepository = (overrides: Partial<PromptRepository>) => {
   const base = {
-    create: jest.fn(),
+    create: jest.fn(async () => undefined),
   };
 
   return { ...base, ...overrides } as PromptRepository;
