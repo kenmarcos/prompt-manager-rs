@@ -1,4 +1,5 @@
 import { PromptForm } from '@/components/prompts';
+import { Prompt } from '@/generated/prisma/client';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { toast } from 'sonner';
@@ -9,21 +10,25 @@ jest.mock('next/navigation', () => ({
 }));
 
 const createActionMock = jest.fn();
+const updateActionMock = jest.fn();
 jest.mock('@/app/actions/prompt.actions', () => ({
   createPromptAction: (...args: unknown[]) => createActionMock(...args),
+
+  updatePromptAction: (...args: unknown[]) => updateActionMock(...args),
 }));
 
 jest.mock('sonner', () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));
 
-const makeSut = () => {
-  return render(<PromptForm />);
+const makeSut = (prompt: Prompt | null = null) => {
+  return render(<PromptForm prompt={prompt} />);
 };
 
 describe('PromptForm', () => {
   beforeEach(() => {
     createActionMock.mockReset();
+    updateActionMock.mockReset();
     refreshMock.mockReset();
     (toast.success as jest.Mock).mockReset();
     (toast.error as jest.Mock).mockReset();
@@ -96,5 +101,49 @@ describe('PromptForm', () => {
     expect(screen.getByText('O conteúdo é obrigatório')).toBeVisible();
 
     expect(createActionMock).not.toHaveBeenCalled();
+  });
+
+  it('deve atualizar um prompt existente, com sucesso', async () => {
+    const successMessage = 'success';
+
+    updateActionMock.mockResolvedValueOnce({
+      success: true,
+      message: successMessage,
+    });
+
+    const now = new Date();
+    const prompt: Prompt = {
+      id: '1',
+      title: 'old title',
+      content: 'old content',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const newTitle = 'new title';
+    const newContent = 'new content';
+
+    makeSut(prompt);
+
+    const titleField = screen.getByPlaceholderText(/título do prompt/i);
+    await userEvent.clear(titleField);
+    await userEvent.type(titleField, newTitle);
+
+    const contentField = screen.getByPlaceholderText(
+      /digite o conteúdo do seu prompt aqui.../i
+    );
+    await userEvent.clear(contentField);
+    await userEvent.type(contentField, newContent);
+
+    const submitButton = screen.getByRole('button', { name: /salvar/i });
+    await userEvent.click(submitButton);
+
+    expect(updateActionMock).toHaveBeenCalledWith({
+      id: prompt.id,
+      title: newTitle,
+      content: newContent,
+    });
+    expect(toast.success).toHaveBeenCalledWith(successMessage);
+    expect(refreshMock).toHaveBeenCalledTimes(1);
   });
 });
