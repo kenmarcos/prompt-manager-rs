@@ -46,7 +46,7 @@ describe('SidebarContent', () => {
 
     expect(screen.getByRole('complementary')).toBeInTheDocument();
     expect(header).toBeInTheDocument();
-    expect(header).toHaveTextContent(/prompt manager/i);
+    expect(header).toHaveTextContent(/prompts/i);
     expect(
       screen.getByRole('button', { name: /novo prompt/i })
     ).toBeInTheDocument();
