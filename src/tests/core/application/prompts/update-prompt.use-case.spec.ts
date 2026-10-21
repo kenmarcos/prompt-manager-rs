@@ -1,5 +1,5 @@
 import { UpdatePromptDTO } from '@/core/application/prompts/update-prompt.dto';
-import { UpdatePromptsUseCase } from '@/core/application/prompts/update-prompt.use-case';
+import { UpdatePromptUseCase } from '@/core/application/prompts/update-prompt.use-case';
 import { PromptRepository } from '@/core/domain/prompts/prompt.repository';
 
 const makeRepository = (overrides: Partial<PromptRepository>) => {
@@ -43,7 +43,7 @@ describe('UpdatePromptUseCase', () => {
       }),
     });
 
-    const useCase = new UpdatePromptsUseCase(repository);
+    const useCase = new UpdatePromptUseCase(repository);
 
     const data: UpdatePromptDTO = {
       id: '1',
@@ -65,7 +65,7 @@ describe('UpdatePromptUseCase', () => {
       // findById: jest.fn().mockResolvedValue(null),
     });
 
-    const useCase = new UpdatePromptsUseCase(repository);
+    const useCase = new UpdatePromptUseCase(repository);
 
     const data: UpdatePromptDTO = {
       id: '1',

@@ -14,7 +14,7 @@ import {
   UpdatePromptDTO,
   updatePromptSchema,
 } from '@/core/application/prompts/update-prompt.dto';
-import { UpdatePromptsUseCase } from '@/core/application/prompts/update-prompt.use-case';
+import { UpdatePromptUseCase } from '@/core/application/prompts/update-prompt.use-case';
 
 interface SearchPromptFormState {
   success: boolean;
@@ -120,7 +120,7 @@ export const updatePromptAction = async (
 
   try {
     const repository = new PrismaPromptRepository(prisma);
-    const useCase = new UpdatePromptsUseCase(repository);
+    const useCase = new UpdatePromptUseCase(repository);
 
     await useCase.execute(validated.data);
 

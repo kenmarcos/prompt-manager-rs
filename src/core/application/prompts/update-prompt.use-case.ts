@@ -2,7 +2,7 @@ import { PromptRepository } from '@/core/domain/prompts/prompt.repository';
 import { UpdatePromptDTO } from './update-prompt.dto';
 import { Prompt } from '@/generated/prisma/client';
 
-export class UpdatePromptsUseCase {
+export class UpdatePromptUseCase {
   constructor(private promptRepository: PromptRepository) {}
 
   async execute(data: UpdatePromptDTO): Promise<Prompt> {
