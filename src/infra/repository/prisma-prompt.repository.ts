@@ -2,7 +2,6 @@ import { CreatePromptDTO } from '@/core/application/prompts/create-prompt.dto';
 import { Prompt } from '@/core/domain/prompts/prompt.entity';
 import { PromptRepository } from '@/core/domain/prompts/prompt.repository';
 import { PrismaClient } from '@/generated/prisma/client';
-import { title } from 'process';
 
 export class PrismaPromptRepository implements PromptRepository {
   constructor(private prisma: PrismaClient) {}
