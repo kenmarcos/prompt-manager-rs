@@ -6,6 +6,13 @@ import { render, screen } from '@/lib/test-utils';
 import userEvent from '@testing-library/user-event';
 import { toast } from 'sonner';
 
+const deleteMock = jest.fn();
+jest.mock('@/app/actions/prompt.actions', () => {
+  return {
+    deletePromptAction: (id: string) => deleteMock(id),
+  };
+});
+
 jest.mock('sonner', () => {
   return {
     toast: {
@@ -53,6 +60,11 @@ describe('PromptCard', () => {
   });
 
   it('deve remover com sucesso e exibir o toast', async () => {
+    deleteMock.mockResolvedValue({
+      success: true,
+      message: 'Prompt removido com sucesso!',
+    });
+
     const prompt = {
       id: '1',
       title: 'title 01',
