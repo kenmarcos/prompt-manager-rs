@@ -17,6 +17,7 @@ jest.mock('sonner', () => {
   return {
     toast: {
       success: jest.fn(),
+      error: jest.fn(),
     },
   };
 });
@@ -76,13 +77,37 @@ describe('PromptCard', () => {
     const openDialogButton = screen.getByRole('button', {
       name: 'Remover Prompt',
     });
-
     await userEvent.click(openDialogButton);
 
     const deleteButton = screen.getByRole('button', { name: 'Remover' });
-
     await userEvent.click(deleteButton);
 
     expect(toast.success).toHaveBeenCalledWith('Prompt removido com sucesso!');
+  });
+
+  it('deve exibir erro quando a action falhar', async () => {
+    const errorMessage = 'error message';
+    deleteMock.mockResolvedValue({
+      success: false,
+      message: errorMessage,
+    });
+
+    const prompt = {
+      id: '1',
+      title: 'title 01',
+      content: 'content 01',
+    };
+
+    makeSut({ prompt });
+
+    const openDialogButton = screen.getByRole('button', {
+      name: /remover prompt/i,
+    });
+    await userEvent.click(openDialogButton);
+
+    const deleteButton = screen.getByRole('button', { name: /remover/i });
+    await userEvent.click(deleteButton);
+
+    expect(toast.error).toHaveBeenCalledWith(errorMessage);
   });
 });
