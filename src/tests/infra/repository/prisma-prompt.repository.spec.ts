@@ -32,6 +32,9 @@ interface PromptDelegateMock {
   update: jest.MockedFunction<
     (args: { where: { id: string }; data: UpdatePromptDTO }) => Promise<Prompt>
   >;
+  delete: jest.MockedFunction<
+    (args: { where: { id: string } }) => Promise<void>
+  >;
 }
 
 interface PrismaMock {
@@ -46,6 +49,7 @@ const createMockPrisma = () => {
       findFirst: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
     },
   };
 
@@ -301,6 +305,20 @@ describe('PrismaPromptRepository', () => {
       expect(call.where).toEqual({ id: prompt.id });
       expect(call.data).toEqual(data);
       expect('title' in call.data).toBe(false);
+    });
+  });
+
+  describe('delete', () => {
+    it('deve chamar prisma.prompt.delete com where id', async () => {
+      const promptId = '1';
+
+      await repository.delete(promptId);
+
+      expect(prisma.prompt.delete).toHaveBeenCalledWith({
+        where: {
+          id: promptId,
+        },
+      });
     });
   });
 });

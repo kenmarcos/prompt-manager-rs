@@ -5,6 +5,12 @@ import { PrismaClient } from '@/generated/prisma/client';
 
 export class PrismaPromptRepository implements PromptRepository {
   constructor(private prisma: PrismaClient) {}
+  async delete(id: string): Promise<void> {
+    await this.prisma.prompt.delete({
+      where: { id },
+    });
+  }
+
   async update(id: string, data: Partial<CreatePromptDTO>): Promise<Prompt> {
     const updated = await this.prisma.prompt.update({
       where: {

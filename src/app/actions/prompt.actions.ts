@@ -15,6 +15,7 @@ import {
   updatePromptSchema,
 } from '@/core/application/prompts/update-prompt.dto';
 import { UpdatePromptUseCase } from '@/core/application/prompts/update-prompt.use-case';
+import { DeletePromptUseCase } from '@/core/application/prompts/delete-prompt.use-case';
 
 interface SearchPromptFormState {
   success: boolean;
