@@ -16,6 +16,7 @@ import {
 } from '@/core/application/prompts/update-prompt.dto';
 import { UpdatePromptUseCase } from '@/core/application/prompts/update-prompt.use-case';
 import { DeletePromptUseCase } from '@/core/application/prompts/delete-prompt.use-case';
+import { revalidatePath } from 'next/cache';
 
 interface SearchPromptFormState {
   success: boolean;
@@ -50,6 +51,8 @@ export const createPromptAction = async (
     const useCase = new CreatePromptsUseCase(repository);
 
     await useCase.execute(validated.data);
+
+    revalidatePath('/', 'layout');
 
     return {
       success: true,
@@ -125,6 +128,8 @@ export const updatePromptAction = async (
 
     await useCase.execute(validated.data);
 
+    revalidatePath('/', 'layout');
+
     return {
       success: true,
       message: 'Prompt atualizado com sucesso',
@@ -158,6 +163,8 @@ export const deletePromptAction = async (id: string): Promise<FormState> => {
     const useCase = new DeletePromptUseCase(repository);
 
     await useCase.execute(id);
+
+    revalidatePath('/', 'layout');
 
     return {
       success: true,

@@ -24,6 +24,7 @@ export interface PromptCardProps {
 }
 
 export const PromptCard = ({ prompt }: PromptCardProps) => {
+  const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeletePrompt = async () => {
@@ -34,6 +35,8 @@ export const PromptCard = ({ prompt }: PromptCardProps) => {
     toast[result.success ? 'success' : 'error'](result.message);
 
     setIsDeleting(false);
+
+    setOpen(false);
   };
 
   return (
@@ -49,7 +52,7 @@ export const PromptCard = ({ prompt }: PromptCardProps) => {
           </p>
         </Link>
 
-        <AlertDialog>
+        <AlertDialog open={open} onOpenChange={setOpen}>
           <AlertDialogTrigger
             render={
               <Button

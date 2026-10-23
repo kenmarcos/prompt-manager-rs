@@ -10,3 +10,9 @@ import { webcrypto } from 'crypto';
 if (!(globalThis as any).crypto) {
   (globalThis as any).crypto = webcrypto;
 }
+
+jest.mock('next/cache', () => {
+  return {
+    revalidatePath: jest.fn(),
+  };
+});
