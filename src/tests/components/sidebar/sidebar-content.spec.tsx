@@ -266,4 +266,24 @@ describe('SidebarContent', () => {
     expect(submitSpy).toHaveBeenCalled();
     submitSpy.mockRestore();
   });
+
+  it('deve abrir e fechar o menu mobile', async () => {
+    makeSut();
+
+    const aside = screen.getByRole('complementary');
+    expect(aside.className).toContain('-translate-x-full');
+
+    const menuButton = screen.getByRole('button', { name: /abrir menu/i });
+
+    await userEvent.click(menuButton);
+
+    expect(aside.className).toContain('translate-x-0');
+
+    const closeMenuButton = screen.getByRole('button', {
+      name: /fechar menu/i,
+    });
+    await userEvent.click(closeMenuButton);
+
+    expect(aside.className).toContain('-translate-x-full');
+  });
 });
