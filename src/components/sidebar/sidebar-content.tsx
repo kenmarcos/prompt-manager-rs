@@ -17,6 +17,9 @@ import { PromptList } from '../prompts';
 import { searchPromptAction } from '@/app/actions/prompt.actions';
 import { Spinner } from '../ui/spinner';
 import { Logo } from '../logo';
+import { useDebouncedCallback } from 'use-debounce';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 export interface SidebarContentProps {
   prompts: PromptSummary[];
@@ -50,24 +53,31 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
     router.push('/new');
   };
 
-  const handleSearchPrompt = (event: ChangeEvent<HTMLInputElement>) => {
-    const newSearchInput = event.target.value;
-    setSearchInput(newSearchInput);
-
+  const debouncedSearch = useDebouncedCallback((newSearchInput: string) => {
     const url = newSearchInput
       ? `/?q=${encodeURIComponent(newSearchInput)}`
       : '/';
 
     router.push(url, { scroll: false });
 
-    formRef.current?.requestSubmit();
+    if (newSearchInput.trim()) {
+      formRef.current?.requestSubmit();
+    }
+  }, SEARCH_DEBOUNCE_MS);
+
+  const handleSearchPrompt = (event: ChangeEvent<HTMLInputElement>) => {
+    const newSearchInput = event.target.value;
+    setSearchInput(newSearchInput);
+    debouncedSearch(newSearchInput);
   };
 
+  // Submits once on mount when the page is opened with ?q=
   useEffect(() => {
     if (!hasQuery) return;
 
     formRef.current?.requestSubmit();
-  }, [hasQuery]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <aside

@@ -161,13 +161,16 @@ describe('SidebarContent', () => {
     const searchField = screen.getByPlaceholderText(/buscar prompt/i);
 
     await userEvent.type(searchField, text);
-    expect(pushMock).toHaveBeenCalled();
-    const lastCall = pushMock.mock.calls.at(-1);
-    expect(lastCall?.[0]).toBe('/?q=A%20B');
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenLastCalledWith('/?q=A%20B', {
+        scroll: false,
+      })
+    );
 
     await userEvent.clear(searchField);
-    const lastClearCall = pushMock.mock.calls.at(-1);
-    expect(lastClearCall?.[0]).toBe('/');
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenLastCalledWith('/', { scroll: false })
+    );
   });
 
   it('should initialize the search field with the query parameter', async () => {
@@ -223,7 +226,27 @@ describe('SidebarContent', () => {
 
     await userEvent.type(searchField, 'AI');
 
-    expect(submitSpy).toHaveBeenCalled();
+    await waitFor(() => expect(submitSpy).toHaveBeenCalled());
+    submitSpy.mockRestore();
+  });
+
+  it('should debounce the search and submit only once after typing stops', async () => {
+    const submitSpy = jest
+      .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+      .mockImplementation(() => undefined);
+
+    makeSut();
+
+    const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+
+    await userEvent.type(searchField, 'prompt');
+
+    expect(submitSpy).not.toHaveBeenCalled();
+    expect(pushMock).not.toHaveBeenCalled();
+
+    await waitFor(() => expect(submitSpy).toHaveBeenCalledTimes(1));
+    expect(pushMock).toHaveBeenCalledTimes(1);
+    expect(pushMock).toHaveBeenCalledWith('/?q=prompt', { scroll: false });
     submitSpy.mockRestore();
   });
 
