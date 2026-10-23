@@ -90,7 +90,7 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
   return (
     <>
       <Button
-        className="hidden fixed top-6 left-6 z-50"
+        className="md:hidden fixed top-6 left-6 z-50"
         variant="secondary"
         title="Abrir menu"
         aria-label="Abrir menu"
