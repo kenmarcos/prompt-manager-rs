@@ -2,10 +2,14 @@ import {
   SidebarContent,
   SidebarContentProps,
 } from '@/components/sidebar/sidebar-content';
-import { render, screen, waitFor } from '@/lib/test-utils';
+import { act, render, screen, waitFor } from '@/lib/test-utils';
 import { userEvent } from '@testing-library/user-event';
+import { useState } from 'react';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const pushMock = jest.fn();
+const setQueryMock = jest.fn();
 
 let mockSearchParams = new URLSearchParams();
 
@@ -14,7 +18,22 @@ jest.mock('next/navigation', () => {
     useRouter: () => ({
       push: pushMock,
     }),
-    useSearchParams: () => mockSearchParams,
+  };
+});
+
+jest.mock('nuqs', () => {
+  return {
+    debounce: (ms: number) => ({ method: 'debounce', timeMs: ms }),
+    useQueryState: (key: string) => {
+      const [value, setValue] = useState(mockSearchParams.get(key) ?? '');
+
+      const setQuery = (nextValue: string, options?: unknown) => {
+        setQueryMock(nextValue, options);
+        setValue(nextValue);
+      };
+
+      return [value, setQuery] as const;
+    },
   };
 });
 
@@ -37,6 +56,7 @@ describe('SidebarContent', () => {
   beforeEach(() => {
     mockSearchParams = new URLSearchParams();
     pushMock.mockClear();
+    setQueryMock.mockClear();
   });
 
   it('should render the sidebar content', () => {
@@ -155,22 +175,22 @@ describe('SidebarContent', () => {
     expect(searchField).toHaveValue(text);
   });
 
-  it('should navigate with encoded URL when typing in the search field and clear the search field', async () => {
+  it('should update the query param with debounced URL updates when typing and clearing', async () => {
     const text = 'A B';
     makeSut();
     const searchField = screen.getByPlaceholderText(/buscar prompt/i);
 
     await userEvent.type(searchField, text);
-    await waitFor(() =>
-      expect(pushMock).toHaveBeenLastCalledWith('/?q=A%20B', {
-        scroll: false,
-      })
-    );
+
+    expect(setQueryMock).toHaveBeenLastCalledWith(text, {
+      limitUrlUpdates: { method: 'debounce', timeMs: SEARCH_DEBOUNCE_MS },
+    });
 
     await userEvent.clear(searchField);
-    await waitFor(() =>
-      expect(pushMock).toHaveBeenLastCalledWith('/', { scroll: false })
-    );
+
+    expect(setQueryMock).toHaveBeenLastCalledWith('', {
+      limitUrlUpdates: { method: 'debounce', timeMs: SEARCH_DEBOUNCE_MS },
+    });
   });
 
   it('should initialize the search field with the query parameter', async () => {
@@ -215,39 +235,86 @@ describe('SidebarContent', () => {
     expect(promptList).toBeInTheDocument();
   });
 
-  it('should submit the form when typing in the search field', async () => {
-    const submitSpy = jest
-      .spyOn(HTMLFormElement.prototype, 'requestSubmit')
-      .mockImplementation(() => undefined);
+  describe('debounced search submit', () => {
+    let submitSpy: jest.SpyInstance;
 
-    makeSut();
+    beforeEach(() => {
+      jest.useFakeTimers();
+      submitSpy = jest
+        .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+        .mockImplementation(() => undefined);
+    });
 
-    const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+    afterEach(() => {
+      jest.useRealTimers();
+      submitSpy.mockRestore();
+    });
 
-    await userEvent.type(searchField, 'AI');
+    const setupUser = () =>
+      userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
-    await waitFor(() => expect(submitSpy).toHaveBeenCalled());
-    submitSpy.mockRestore();
-  });
+    it('should submit only once after typing stops', async () => {
+      const user = setupUser();
+      makeSut();
 
-  it('should debounce the search and submit only once after typing stops', async () => {
-    const submitSpy = jest
-      .spyOn(HTMLFormElement.prototype, 'requestSubmit')
-      .mockImplementation(() => undefined);
+      const searchField = screen.getByPlaceholderText(/buscar prompt/i);
 
-    makeSut();
+      await user.type(searchField, 'prompt');
 
-    const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+      expect(submitSpy).not.toHaveBeenCalled();
 
-    await userEvent.type(searchField, 'prompt');
+      act(() => {
+        jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      });
 
-    expect(submitSpy).not.toHaveBeenCalled();
-    expect(pushMock).not.toHaveBeenCalled();
+      expect(submitSpy).toHaveBeenCalledTimes(1);
+    });
 
-    await waitFor(() => expect(submitSpy).toHaveBeenCalledTimes(1));
-    expect(pushMock).toHaveBeenCalledTimes(1);
-    expect(pushMock).toHaveBeenCalledWith('/?q=prompt', { scroll: false });
-    submitSpy.mockRestore();
+    it('should not submit before the debounce delay elapses', async () => {
+      const user = setupUser();
+      makeSut();
+
+      const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+
+      await user.type(searchField, 'AI');
+
+      act(() => {
+        jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS - 1);
+      });
+
+      expect(submitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should cancel the pending submit when the search field is cleared', async () => {
+      const user = setupUser();
+      makeSut();
+
+      const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+
+      await user.type(searchField, 'pri');
+      await user.clear(searchField);
+
+      act(() => {
+        jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      });
+
+      expect(submitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not submit when typing only whitespace', async () => {
+      const user = setupUser();
+      makeSut();
+
+      const searchField = screen.getByPlaceholderText(/buscar prompt/i);
+
+      await user.type(searchField, '   ');
+
+      act(() => {
+        jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      });
+
+      expect(submitSpy).not.toHaveBeenCalled();
+    });
   });
 
   it('should submit automatically on initial render when a query param is provided', async () => {

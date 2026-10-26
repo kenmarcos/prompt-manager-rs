@@ -2,6 +2,7 @@ import { Sidebar } from '@/components/sidebar';
 import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
@@ -25,15 +26,17 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           inter.variable
         )}
       >
-        <Sidebar />
+        <NuqsAdapter>
+          <Sidebar />
 
-        <main className="relative flex-1 overflow-auto min-w-0">
-          <div className="p-4 sm:p-6 md:p-8 max-w-full md:max-w-3xl mx-auto h-full">
-            {children}
-          </div>
-        </main>
+          <main className="relative flex-1 overflow-auto min-w-0">
+            <div className="p-4 sm:p-6 md:p-8 max-w-full md:max-w-3xl mx-auto h-full">
+              {children}
+            </div>
+          </main>
 
-        <Toaster position="top-right" />
+          <Toaster position="top-right" />
+        </NuqsAdapter>
       </body>
     </html>
   );

@@ -10,13 +10,14 @@ import {
 } from 'react';
 import { Button } from '../ui/button';
 import { ArrowLeftToLine, ArrowRightToLine, Menu, Plus, X } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Input } from '../ui/input';
 import { PromptSummary } from '@/core/domain/prompts/prompt.entity';
 import { PromptList } from '../prompts';
 import { searchPromptAction } from '@/app/actions/prompt.actions';
 import { Spinner } from '../ui/spinner';
 import { Logo } from '../logo';
+import { useQueryState, debounce } from 'nuqs';
 import { useDebouncedCallback } from 'use-debounce';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -27,11 +28,10 @@ export interface SidebarContentProps {
 
 export const SidebarContent = ({ prompts }: SidebarContentProps) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [isExpanded, setIsExpanded] = useState(true);
-  const [searchInput, setSearchInput] = useState(searchParams.get('q') ?? '');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [query, setQuery] = useQueryState('q', { defaultValue: '' });
 
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -41,7 +41,7 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
       prompts,
     });
 
-  const hasQuery = searchInput.trim().length > 0;
+  const hasQuery = query.trim().length > 0;
   const promptList = hasQuery
     ? (searchPromptFormState.prompts ?? prompts)
     : prompts;
@@ -54,22 +54,22 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
     router.push('/new');
   };
 
-  const debouncedSearch = useDebouncedCallback((newSearchInput: string) => {
-    const url = newSearchInput
-      ? `/?q=${encodeURIComponent(newSearchInput)}`
-      : '/';
-
-    router.push(url, { scroll: false });
-
-    if (newSearchInput.trim()) {
-      formRef.current?.requestSubmit();
-    }
+  const debouncedSubmitSearch = useDebouncedCallback(() => {
+    formRef.current?.requestSubmit();
   }, SEARCH_DEBOUNCE_MS);
 
   const handleSearchPrompt = (event: ChangeEvent<HTMLInputElement>) => {
     const newSearchInput = event.target.value;
-    setSearchInput(newSearchInput);
-    debouncedSearch(newSearchInput);
+
+    setQuery(newSearchInput, {
+      limitUrlUpdates: debounce(SEARCH_DEBOUNCE_MS),
+    });
+
+    if (newSearchInput.trim()) {
+      debouncedSubmitSearch();
+    } else {
+      debouncedSubmitSearch.cancel();
+    }
   };
 
   const openMobile = () => {
@@ -153,7 +153,7 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
                     placeholder="Buscar prompt..."
                     autoFocus
                     onChange={handleSearchPrompt}
-                    value={searchInput}
+                    value={query}
                   />
 
                   {isPending && (
