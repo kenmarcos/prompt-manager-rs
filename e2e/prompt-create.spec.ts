@@ -2,6 +2,7 @@ import { PrismaClient } from '@/generated/prisma/client';
 import { expect, test } from '@playwright/test';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { fillPromptForm } from './helpers';
 
 test('Criação de prompt via UI (sucesso)', async ({ page }) => {
   const uniqueTitle = `E2E Prompt ${Date.now()}`;
@@ -11,12 +12,10 @@ test('Criação de prompt via UI (sucesso)', async ({ page }) => {
 
   await expect(page.getByPlaceholder(/título do prompt/i)).toBeVisible();
 
-  await page.fill('input[name="title"]', uniqueTitle);
-  await page.fill('textarea[name="content"]', content);
+  await fillPromptForm(page, uniqueTitle, content);
   await page.getByRole('button', { name: /salvar/i }).click();
 
-  await page.waitForSelector('text=Prompt criado com sucesso', {
-    state: 'visible',
+  await expect(page.getByText('Prompt criado com sucesso')).toBeVisible({
     timeout: 15000,
   });
 });
@@ -41,13 +40,10 @@ test('Validação de duplicidade de título', async ({ page }) => {
 
   await expect(page.getByPlaceholder(/título do prompt/i)).toBeVisible();
 
-  await page.fill('input[name="title"]', duplicateTitle);
-  await page.fill('textarea[name="content"]', content);
-
+  await fillPromptForm(page, duplicateTitle, content);
   await page.getByRole('button', { name: /salvar/i }).click();
 
-  await page.waitForSelector('text=Este prompt já existe', {
-    state: 'visible',
+  await expect(page.getByText('Este prompt já existe')).toBeVisible({
     timeout: 15000,
   });
   await expect(page.getByRole('heading', { name: duplicateTitle })).toHaveCount(

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@/generated/prisma/client';
 import { test, expect } from '@playwright/test';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { fillPromptForm } from './helpers';
 
 test('Edição de prompt via UI (sucesso)', async ({ page }) => {
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -24,17 +25,18 @@ test('Edição de prompt via UI (sucesso)', async ({ page }) => {
 
   await expect(page.getByPlaceholder(/título do prompt/i)).toBeVisible();
 
-  await page.fill('input[name="title"]', updatedTitle);
-  await page.fill('textarea[name="content"]', updatedContent);
-
+  await fillPromptForm(page, updatedTitle, updatedContent);
   await page.getByRole('button', { name: /salvar/i }).click();
 
-  await page.waitForSelector('text=Prompt atualizado com sucesso', {
-    state: 'visible',
+  await expect(page.getByText('Prompt atualizado com sucesso')).toBeVisible({
     timeout: 15000,
   });
 
-  await expect(page.getByRole('heading', { name: updatedTitle })).toBeVisible();
-  await expect(page.locator('input[name="title"]')).toHaveValue(updatedTitle);
-  // await expect(page.getByPlaceholder(/título do prompt/i)).toHaveValue(updatedTitle);
+  // A sidebar só reflete o novo título após o revalidatePath/router.refresh
+  await expect(page.getByRole('heading', { name: updatedTitle })).toBeVisible({
+    timeout: 15000,
+  });
+  await expect(page.getByPlaceholder(/título do prompt/i)).toHaveValue(
+    updatedTitle
+  );
 });
