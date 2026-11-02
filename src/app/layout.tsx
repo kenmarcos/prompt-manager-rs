@@ -2,6 +2,7 @@ import { Sidebar } from '@/components/sidebar';
 import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import { HydrationMarker } from '@/components/hydration-marker';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           </main>
 
           <Toaster position="top-right" />
+          <HydrationMarker />
         </NuqsAdapter>
       </body>
     </html>

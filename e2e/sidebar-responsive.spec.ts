@@ -1,4 +1,4 @@
-import test, { expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('Sidebar Responsiva', () => {
   test('mobile: menu hambúrger deve abrir sidebar e botão X deve fechar a sidebar', async ({

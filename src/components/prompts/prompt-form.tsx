@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { CopyButton } from '../button-actions';
 import { Prompt } from '@/generated/prisma/client';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 interface PromptFormProps {
   prompt?: Prompt | null;
@@ -25,6 +26,12 @@ interface PromptFormProps {
 
 export const PromptForm = ({ prompt }: PromptFormProps) => {
   const router = useRouter();
+  // false até o React hidratar o formulário. Antes disso o HTML do servidor já
+  // aparece, mas o React ainda não controla os campos: ele reaplica os
+  // defaultValues e apaga o que o usuário digitou. Os campos ficam readOnly e o
+  // botão disabled até lá. Isso protege o usuário e o Playwright, que só age em
+  // elementos editáveis/habilitados (ver docs "Navigations > Hydration").
+  const isHydrated = useHydrated();
 
   const form = useForm<CreatePromptDTO>({
     resolver: zodResolver(createPromptSchema),
@@ -63,7 +70,8 @@ export const PromptForm = ({ prompt }: PromptFormProps) => {
       <header className="flex flex-wrap gap-2 items-center mb-6 justify-end">
         <CopyButton content={content} />
 
-        <Button type="submit" size="sm">
+        {/* disabled: um submit antes da hidratação não passaria pelo handler */}
+        <Button type="submit" size="sm" disabled={!isHydrated}>
           Salvar
         </Button>
       </header>
@@ -78,6 +86,8 @@ export const PromptForm = ({ prompt }: PromptFormProps) => {
               variant="transparent"
               size="lg"
               autoFocus
+              // readOnly (e não disabled) para o autoFocus continuar valendo
+              readOnly={!isHydrated}
               {...field}
             />
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -94,6 +104,7 @@ export const PromptForm = ({ prompt }: PromptFormProps) => {
               placeholder="Digite o conteúdo do seu prompt aqui..."
               variant="transparent"
               size="lg"
+              readOnly={!isHydrated}
               {...field}
             />
 

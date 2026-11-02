@@ -19,6 +19,7 @@ import { Spinner } from '../ui/spinner';
 import { Logo } from '../logo';
 import { useQueryState, debounce } from 'nuqs';
 import { useDebouncedCallback } from 'use-debounce';
+import { useHydrated } from '@/hooks/use-hydrated';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -32,6 +33,12 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [query, setQuery] = useQueryState('q', { defaultValue: '' });
+  // false até o React hidratar a sidebar. Antes disso o campo de busca já
+  // aceita texto, mas o onChange ainda não está ligado: nada dispara a busca
+  // nem atualiza o ?q= da URL. O campo fica readOnly até lá, e o Playwright
+  // espera ele ficar editável antes de digitar. Vale para esta sidebar mesmo
+  // ela estando dentro de um <Suspense>, que pode hidratar depois da raiz.
+  const isHydrated = useHydrated();
 
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -152,6 +159,8 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
                     type="text"
                     placeholder="Buscar prompt..."
                     autoFocus
+                    // readOnly (e não disabled) para o autoFocus continuar valendo
+                    readOnly={!isHydrated}
                     onChange={handleSearchPrompt}
                     value={query}
                   />

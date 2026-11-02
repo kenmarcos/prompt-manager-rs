@@ -1,5 +1,5 @@
 import { PrismaClient } from '@/generated/prisma/client';
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 test('Busca de prompts na Sidebar filtrando a lista de prompt em tempo real baseado no termo digitado', async ({
@@ -22,13 +22,7 @@ test('Busca de prompts na Sidebar filtrando a lista de prompt em tempo real base
 
   const searchInput = page.getByPlaceholder('Buscar prompt...');
 
-  // Um fill antes da hidratação não dispara o onChange do React; o ?q= na
-  // URL (escrito pelo nuqs) confirma que a busca foi de fato acionada
-  await expect(async () => {
-    await searchInput.fill('');
-    await searchInput.fill(uniqueAlpha);
-    await expect(page).toHaveURL(/[?&]q=/, { timeout: 1000 });
-  }).toPass();
+  await searchInput.fill(uniqueAlpha);
 
   await expect(page.getByText(uniqueBeta)).toHaveCount(0, { timeout: 15000 });
   await expect(page.getByText(uniqueAlpha)).toHaveCount(1);

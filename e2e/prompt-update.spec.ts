@@ -1,7 +1,6 @@
 import { PrismaClient } from '@/generated/prisma/client';
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { fillPromptForm } from './helpers';
 
 test('Edição de prompt via UI (sucesso)', async ({ page }) => {
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -25,7 +24,8 @@ test('Edição de prompt via UI (sucesso)', async ({ page }) => {
 
   await expect(page.getByPlaceholder(/título do prompt/i)).toBeVisible();
 
-  await fillPromptForm(page, updatedTitle, updatedContent);
+  await page.getByPlaceholder(/título do prompt/i).fill(updatedTitle);
+  await page.getByPlaceholder(/conteúdo do seu prompt/i).fill(updatedContent);
   await page.getByRole('button', { name: /salvar/i }).click();
 
   await expect(page.getByText('Prompt atualizado com sucesso')).toBeVisible({

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@/generated/prisma/client';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 test('Deleção de prompt via UI (sucesso)', async ({ page }) => {
@@ -28,7 +28,9 @@ test('Deleção de prompt via UI (sucesso)', async ({ page }) => {
 
   await dialog.getByRole('button', { name: /remover/i }).click();
 
-  await expect(page.getByText('Prompt removido com sucesso')).toBeVisible();
+  await expect(page.getByText('Prompt removido com sucesso')).toBeVisible({
+    timeout: 15000,
+  });
   await expect(dialog).toBeHidden();
-  await expect(promptItem).toHaveCount(0);
+  await expect(promptItem).toHaveCount(0, { timeout: 15000 });
 });
