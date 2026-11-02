@@ -80,7 +80,7 @@ Para o desenvolvimento desse projeto, as seguintes ferramentas foram utilizadas:
 
 ## 👨‍💻 Autor
 
-<img style="border-radius: 15%;" src="https://gitlab.com/uploads/-/system/user/avatar/8603970/avatar.png?width=400" width=70 alt="author-profile-picture"/>
+<img style="border-radius: 15%;" src="https://github.com/kenmarcos.png?width=400" width=70 alt="author-profile-picture"/>
 
 Marcos Kenji Kuribayashi
 
