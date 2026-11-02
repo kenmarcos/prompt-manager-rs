@@ -47,7 +47,7 @@ export const PromptCard = ({ prompt }: PromptCardProps) => {
             {prompt.title}
           </h3>
 
-          <p className="text-xs text-gray-400 mt-1 line-calmp-2">
+          <p className="text-xs text-gray-400 mt-1 line-clamp-2">
             {prompt.content}
           </p>
         </Link>

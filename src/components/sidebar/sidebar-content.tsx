@@ -92,7 +92,7 @@ export const SidebarContent = ({ prompts }: SidebarContentProps) => {
 
     formRef.current?.requestSubmit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [prompts]);
 
   return (
     <>
